@@ -1,2 +1,5 @@
-El entorno virtual se generado usando conda 
-con
+- El entorno virtual se generado usando conda 
+- Las versiones de las librerias instaladas se ubican en el archivo requeriments.txt
+- La api se conecta de manera local con la libreria mysql en la cual
+  se realizo la ingesta de datos 
+  
