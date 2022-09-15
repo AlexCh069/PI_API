@@ -1,0 +1,2 @@
+El entorno virtual se generado usando conda 
+con
