@@ -1,5 +1,11 @@
-- El entorno virtual se generado usando conda 
-- Las versiones de las librerias instaladas se ubican en el archivo requeriments.txt
-- La api se conecta de manera local con la libreria mysql en la cual
-  se realizo la ingesta de datos 
-  
+
+
+- The virtual environment is generated using conda
+- The versions of the installed libraries are located in the file requirements.txt
+- The api connects locally with the mysql library in which
+   data ingestion was performed
+- Run api (command prompt):
+    >> uvicorn main:app --reload
+
+- URL (localhost):
+    >> http://127.0.0.1:8000/docs

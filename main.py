@@ -16,7 +16,7 @@ class DataBase:
         print('Conexion establecida')
 
     def select_driver(self,id):
-        sql = 'SELECT * FROM drivers2_db WHERE driverId = {}'.format(id)
+        sql = 'SELECT * FROM drivers WHERE driverId = {}'.format(id)
 
         try:
             self.cursor.execute(sql)
@@ -27,7 +27,7 @@ class DataBase:
             raise
     
     def year_most_races(self):
-        sql = 'SELECT count(*) as Cantidad_Carreras, year as Año FROM races_db group by year order by Cantidad_Carreras desc LIMIT 1;'
+        sql = 'SELECT 	count(*) as Cantidad_Carreras, year_race as Año FROM races group by year_race order by Cantidad_Carreras desc LIMIT 1;'
         
         try:
             self.cursor.execute(sql)
@@ -38,7 +38,7 @@ class DataBase:
             raise
 
     def pilot_most_winner(self):
-        sql = 'SELECT 	count(*) as Cantidad_Carreras, r.driverId, d.Name_Complete FROM results as r JOIN drivers_db as d	ON (r.driverId = d.driverId) WHERE positionOrder = 1 GROUP BY driverId ORDER BY Cantidad_Carreras DESC limit 1;	'
+        sql = 'SELECT 	count(*) as Cantidad_Carreras, r.driverId, d.Name_driver FROM results as r JOIN drivers as d ON (r.driverId = d.driverId) WHERE PositionOrder = 1 GROUP BY driverId ORDER BY Cantidad_Carreras DESC limit 1;	'
         try:
             self.cursor.execute(sql)
             most_winner = self.cursor.fetchone()
@@ -47,7 +47,7 @@ class DataBase:
             raise
 
     def most_travelet_circuit(self):
-        sql = 'SELECT 	count(*) as Cantidad_Veces, r.circuitId, c.name, c.location, c.country FROM races_db as r JOIN circuits as c ON (r.circuitId = c.circuitId) GROUP BY circuitId ORDER BY Cantidad_Veces DESC LIMIT 1;'
+        sql = 'SELECT count(*) as Cantidad_Veces, r.circuitId, c.name, c.location, c.country FROM races as r JOIN circuits as c ON (r.circuitId = c.circuitsId) GROUP BY circuitIdORDER BY Cantidad_Veces DESC LIMIT 1;'
         try:
             self.cursor.execute(sql)
             most_trav_circuit = self.cursor.fetchone()
@@ -58,7 +58,7 @@ class DataBase:
     def pilot_more_points(self):
         american = 'American'
         british = 'British'
-        sql = f'SELECT 	sum(r.points) as Puntos, r.driverId, c.constructorId, c.nationality, c.name, d.Name_Complete FROM results as r JOIN constructors as c 	ON (r.constructorId = c.constructorId) JOIN drivers_db as d 	ON (r.driverId = d.driverId) WHERE c.nationality = "{american}" or c.nationality = "{british}" GROUP BY r.driverId ORDER BY Puntos DESC LIMIT 1;'
+        sql = f'SELECT sum(r.points) as Puntos, r.driverId, c.constructorsId, c.nationality, c.name_constructor, d.Name_driver FROM results as r JOIN constructors as c 	ON (r.constructorId = c.constructorsId) JOIN drivers as d 	ON (r.driverId = d.driverId) WHERE c.nationality = "{american}" or c.nationality = "{british}" GROUP BY r.driverId ORDER BY Puntos DESC LIMIT 1;'
         try:
             self.cursor.execute(sql)
             p_mor_points = self.cursor.fetchone()
@@ -72,14 +72,14 @@ database = DataBase()   # Intanciamos la clase generada para la base de datos
 @app.get('/driver/{id}')
 def Driver_Id(id : int):
     '''
-    Funcion usada como testeo para la base de datos mysql, nos muestra los datos 
-    del piloto, especificando el driverId de este
+    Function used as a test for the mysql database, it shows us the data of the driver, 
+    specifying the driverId of this
 
-    Especificaciones:
+     Specs:
 
-        - Requiere parametro 'id'
-        - Usa una query mysql predeterminada en la funcion, la cual es:
-            <   SELECT * FROM drivers2_db WHERE driverId = {parametro_a_ingresar}    >
+         - Requires parameter 'id'
+         - Use a default mysql query in the function, which is:
+            <   SELECT * FROM drivers WHERE driverId = {parametro_a_ingresar}    >
     '''
     driverId, code, nationality = database.select_driver(id)
     return {'DriverId':driverId,'Code':code,'Nationality':nationality}
@@ -87,16 +87,16 @@ def Driver_Id(id : int):
 @app.get('/year_most_races')
 def most_races():
     '''
-    Funcion usada para obtener el año con mayor cantidad de carreras
+    Function used to obtain the year with the highest number of races
 
-    Especificaciones:
+    Specs:
 
-        - No requiere parametros
-        - Usa una query mysql predeterminada en la funcion, la cual es:
-            <   SELECT 	count(*) as Cantidad_Carreras,
-		            year as Año
-                FROM races_db
-                group by year
+        - Does not require parameters
+        - Use a default mysql query in the function, which is:
+            <   SELECT 	count(*) 	as Cantidad_Carreras,
+                        year_race	as Año
+                FROM races
+                group by year_race
                 order by Cantidad_Carreras desc
                 LIMIT 1;    >
     '''
@@ -108,18 +108,18 @@ def most_races():
 @app.get('/pilot_most_winner')
 def most_winner():
     '''
-    Funcion usada para obtener el nombre del piloto con mas carreras ganadas
+    Function used to get the name of the driver with the most race wins
 
-    Especificaciones:
+    Specs:
 
-        - No requiere parametros
-        - Usa una query mysql predeterminada en la funcion, la cual es:
+        - Does not require parameters
+        - Use a default mysql query in the function, which is: 
             <   SELECT 	count(*) as Cantidad_Carreras, 
                         r.driverId,
-                        d.Name_Complete
+                        d.Name_driver
                 FROM results as r 
-                JOIN drivers_db as d	ON (r.driverId = d.driverId)
-                WHERE positionOrder = 1
+                JOIN drivers as d	ON (r.driverId = d.driverId)
+                WHERE PositionOrder = 1
                 GROUP BY driverId
                 ORDER BY Cantidad_Carreras DESC
                 limit 1;    >
@@ -133,19 +133,19 @@ def most_winner():
 @app.get('/most_traveled_circuit')
 def most_circuits():
     '''
-    Funcion usada para obtener el nombre del circuito con mas recorridos realizados
+    Function used to obtain the name of the circuit with the most routes made
 
-    Especificaciones:
+    Specs:
 
-        - No requiere parametros
-        - Usa una query mysql predeterminada en la funcion, la cual es:
+        - Does not require parameters
+        - Use a default mysql query in the function, which is:
             <   SELECT 	count(*) as Cantidad_Veces,
                         r.circuitId,
                         c.name,
                         c.location,
                         c.country
-                FROM races_db as r
-                JOIN circuits as c ON (r.circuitId = c.circuitId)
+                FROM races as r
+                JOIN circuits as c ON (r.circuitId = c.circuitsId)
                 GROUP BY circuitId
                 ORDER BY Cantidad_Veces DESC
                 LIMIT 1;    >
@@ -161,22 +161,22 @@ def most_circuits():
 @app.get('/pilot_more_points')
 def pilot_more_points_nationality():
     '''
-    Funcion usada para mostrar la piloto con mas puntos obtenidos, sea este Americano o Britanico
+    Function used to show the pilot with the most points obtained, be it American or British
 
-    Especificaciones:
+    Specs:
 
-        - No requiere parametros
-        - Usa una query mysql predeterminada en la funcion, la cual es:
+        - Does not require parameters
+        - Use a default mysql query in the function, which is:
             <   SELECT 	sum(r.points) as Puntos,
                         r.driverId,
-                        c.constructorId,
+                        c.constructorsId,
                         c.nationality,
-                        c.name,
-                        d.Name_Complete
+                        c.name_constructor,
+                        d.Name_driver
                 FROM results as r
-                JOIN constructors as c 	ON (r.constructorId = c.constructorId)
-                JOIN drivers_db as d 	ON (r.driverId = d.driverId)
-                WHERE c.nationality = 'American' or c.nationality = 'British'
+                JOIN constructors as c 	ON (r.constructorId = c.constructorsId)
+                JOIN drivers as d 	ON (r.driverId = d.driverId)
+                WHERE c.nationality = "American" or c.nationality = "British"
                 GROUP BY r.driverId
                 ORDER BY Puntos DESC
                 LIMIT 1;    >
